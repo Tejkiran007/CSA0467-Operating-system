@@ -1,0 +1,41 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+
+int sharedData;
+sem_t semaphore;
+
+void* printDoubledValue(void* arg) {
+    sem_wait(&semaphore); 
+    int data = sharedData;
+    printf("Doubled Value: %d\n", data * 2);
+    sem_post(&semaphore); 
+    pthread_exit(NULL);
+}
+
+void* printFiveTimesValue(void* arg) {
+    sem_wait(&semaphore);  
+    int data = sharedData;
+    printf("Five Times Value: %d\n", data * 5);
+    sem_post(&semaphore); 
+    pthread_exit(NULL);
+}
+
+int main() {
+    pthread_t thread1, thread2;
+    sem_init(&semaphore, 0, 1); 
+
+    printf("Enter an integer value for shared data: ");
+    scanf("%d", &sharedData);
+
+    pthread_create(&thread1, NULL, printDoubledValue, NULL);
+    pthread_create(&thread2, NULL, printFiveTimesValue, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
+    sem_destroy(&semaphore);  
+
+    return 0;
+}
